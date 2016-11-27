@@ -92,6 +92,7 @@ module.exports = {
     // https://github.com/facebookincubator/create-react-app/issues/290
     extensions: ['.js', '.json', '.jsx', ''],
     alias: {
+      '@src': paths.appSrc,
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web'
@@ -133,6 +134,7 @@ module.exports = {
           /\.html$/,
           /\.(js|jsx)$/,
           /\.css$/,
+          /\.(scss|sass)/,
           /\.json$/
         ],
         loader: 'url',
@@ -150,6 +152,7 @@ module.exports = {
         query: {
           babelrc: false,
           presets: [require.resolve('babel-preset-react-app')],
+          plugins: [require.resolve('babel-plugin-transform-decorators-legacy')],
         },
         // @remove-on-eject-end
       },
@@ -169,6 +172,10 @@ module.exports = {
         test: /\.css$/,
         loader: ExtractTextPlugin.extract('style', 'css?importLoaders=1!postcss')
         // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
+      },
+      {
+        test: /(\.scss|\.sass)$/,
+        loader: ExtractTextPlugin.extract('style', 'css!postcss!sass')
       },
       // JSON is not enabled by default in Webpack but both Node and Browserify
       // allow it implicitly so we also enable it.

@@ -84,6 +84,7 @@ module.exports = {
     // https://github.com/facebookincubator/create-react-app/issues/290
     extensions: ['.js', '.json', '.jsx', ''],
     alias: {
+      '@src': paths.appSrc,
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web'
@@ -127,6 +128,7 @@ module.exports = {
           /\.html$/,
           /\.(js|jsx)$/,
           /\.css$/,
+          /\.(scss|sass)/,
           /\.json$/
         ],
         loader: 'url',
@@ -144,6 +146,7 @@ module.exports = {
           // @remove-on-eject-begin
           babelrc: false,
           presets: [require.resolve('babel-preset-react-app')],
+          plugins: [require.resolve('babel-plugin-transform-decorators-legacy')],
           // @remove-on-eject-end
           // This is a feature of `babel-loader` for webpack (not Babel itself).
           // It enables caching results in ./node_modules/.cache/babel-loader/
@@ -159,6 +162,10 @@ module.exports = {
       {
         test: /\.css$/,
         loader: 'style!css?importLoaders=1!postcss'
+      },
+      {
+        test: /(\.scss|\.sass)$/,
+        loader: 'style!css!postcss!sass'
       },
       // JSON is not enabled by default in Webpack but both Node and Browserify
       // allow it implicitly so we also enable it.
