@@ -40,6 +40,7 @@
 
 var fs = require('fs');
 var path = require('path');
+var execSync = require('child_process').execSync;
 var spawn = require('cross-spawn');
 var chalk = require('chalk');
 var semver = require('semver');
@@ -107,38 +108,33 @@ function createApp(name, verbose, version) {
   run(root, appName, version, verbose, originalDirectory);
 }
 
-function install(packageToInstall, verbose, callback) {
-  var args = [
-    'add',
-    '--dev',
-    '--exact',
-    packageToInstall,
-  ];
-  var proc = spawn('yarn', args, {stdio: 'inherit'});
+function shouldUseYarn() {
+  try {
+    execSync('yarn --version', {stdio: 'ignore'});
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
-  var yarnExists = true;
-  proc.on('error', function (err) {
-    if (err.code === 'ENOENT') {
-      yarnExists = false;
-    }
-  });
-  proc.on('close', function (code) {
-    if (yarnExists) {
-      callback(code, 'yarn', args);
-      return;
-    }
-    // No Yarn installed, continuing with npm.
-    args = [
-      'install',
-      verbose && '--verbose',
-      '--save-dev',
-      '--save-exact',
-      packageToInstall,
-    ].filter(function(e) { return e; });
-    var npmProc = spawn('npm', args, {stdio: 'inherit'});
-    npmProc.on('close', function (code) {
-      callback(code, 'npm', args);
-    });
+function install(packageToInstall, verbose, callback) {
+  var command;
+  var args;
+  if (shouldUseYarn()) {
+    command = 'yarn';
+    args = [ 'add', '--dev', '--exact', packageToInstall];
+  } else {
+    command = 'npm';
+    args = ['install', '--save-dev', '--save-exact', packageToInstall];
+  }
+
+  if (verbose) {
+    args.push('--verbose');
+  }
+
+  var child = spawn(command, args, {stdio: 'inherit'});
+  child.on('close', function(code) {
+    callback(code, command, args);
   });
 }
 
@@ -146,10 +142,10 @@ function run(root, appName, version, verbose, originalDirectory) {
   var packageToInstall = getInstallPackage(version);
   var packageName = getPackageName(packageToInstall);
 
-  install(packageToInstall, verbose, function (code, command, args) {
+  install(packageToInstall, verbose, function(code, command, args) {
     if (code !== 0) {
       console.error('`' + command + ' ' + args.join(' ') + '` failed');
-      return;
+      process.exit(1);
     }
 
     checkNodeVersion(packageName);

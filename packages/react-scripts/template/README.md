@@ -13,6 +13,7 @@ You can find the most recent version of this guide [here](https://github.com/fac
   - [npm test](#npm-test)
   - [npm run build](#npm-run-build)
   - [npm run eject](#npm-run-eject)
+- [Syntax Highlighting in the Editor](#syntax-highlighting-in-the-editor)
 - [Displaying Lint Output in the Editor](#displaying-lint-output-in-the-editor)
 - [Installing a Dependency](#installing-a-dependency)
 - [Importing a Component](#importing-a-component)
@@ -59,6 +60,7 @@ You can find the most recent version of this guide [here](https://github.com/fac
 - [Troubleshooting](#troubleshooting)
   - [`npm test` hangs on macOS Sierra](#npm-test-hangs-on-macos-sierra)
   - [`npm run build` silently fails](#npm-run-build-silently-fails)
+  - [Subresource integrity checks fail](#subresource-integrity-checks-fail)
 - [Something Missing?](#something-missing)
 
 ## Updating to New Releases
@@ -155,6 +157,10 @@ If you aren’t satisfied with the build tool and configuration choices, you can
 Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+
+## Syntax Highlighting in the Editor
+
+To configure the syntax highlighting in your favorite text editor, head to the [Babel's docs](https://babeljs.io/docs/editors) and follow the instructions. Some of the most popular editors are covered.
 
 ## Displaying Lint Output in the Editor
 
@@ -1233,6 +1239,17 @@ There are also reports that *uninstalling* Watchman fixes the issue. So if nothi
 ### `npm run build` silently fails
 
 It is reported that `npm run build` can fail on machines with no swap space, which is common in cloud environments. If [the symptoms are matching](https://github.com/facebookincubator/create-react-app/issues/1133#issuecomment-264612171), consider adding some swap space to the machine you’re building on, or build the project locally.
+
+### Subresource integrity checks fail
+
+[Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) digests are added to the build output files. For a particular scenario, these checks may fail when deployed. The files are built using `LF` characters, but if your deployment uses a Git repository for deployment (like Azure web sites) and the Git repository is set up to translate `LF` characters into `CR/LF` characters, then the checked out files will be different and the digests will be invalid.
+
+To fix this, just add a `.gitattributes` file to your deployment repository that will ensure the build files are not modified when checked out:
+
+```
+*.css text eol=lf
+*.js text eol=lf
+```
 
 ## Something Missing?
 
