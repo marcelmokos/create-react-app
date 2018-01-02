@@ -890,10 +890,10 @@ life of the shell session.
 #### Windows (cmd.exe)
 
 ```cmd
-set REACT_APP_SECRET_CODE=abcdef&&npm start
+set "REACT_APP_SECRET_CODE=abcdef" && npm start
 ```
 
-(Note: the lack of whitespace is intentional.)
+(Note: Quotes around the variable assignment are required to avoid a trailing whitespace.)
 
 #### Linux, macOS (Bash)
 
@@ -2131,7 +2131,7 @@ In this case, ensure that the file is there with the proper lettercase and thatâ
 **To do a manual deploy to Netlifyâ€™s CDN:**
 
 ```sh
-npm install netlify-cli
+npm install netlify-cli -g
 netlify deploy
 ```
 
