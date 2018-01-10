@@ -58,12 +58,7 @@ function install_package {
 
   # Install `dependencies`
   cd node_modules/$pkg/
-  if [ "$USE_YARN" = "yes" ]
-  then
-    yarn install --production
-  else
-    npm install --only=production
-  fi
+  npm install --only=production
   # Remove our packages to ensure side-by-side versions are used (which we link)
   rm -rf node_modules/{babel-preset-react-app,eslint-config-react-app,react-dev-utils,react-error-overlay,react-scripts}
   cd ../..
@@ -110,10 +105,7 @@ fi
 
 if hash npm 2>/dev/null
 then
-  # npm 5 is too buggy right now
-  if [ $(npm -v | head -c 1) -eq 5 ]; then
-    npm i -g npm@^4.x
-  fi;
+  npm i -g npm@latest
   npm cache clean || npm cache verify
 fi
 
@@ -122,13 +114,6 @@ cp package.json package.json.bak
 grep -v "postinstall" package.json > temp && mv temp package.json
 npm install
 mv package.json.bak package.json
-
-if [ "$USE_YARN" = "yes" ]
-then
-  # Install Yarn so that the test can use it to install packages.
-  npm install -g yarn
-  yarn cache clean
-fi
 
 # We removed the postinstall, so do it manually
 node bootstrap.js

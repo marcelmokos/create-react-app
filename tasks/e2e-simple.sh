@@ -57,12 +57,7 @@ function install_package {
 
   # Install `dependencies`
   cd node_modules/$pkg/
-  if [ "$USE_YARN" = "yes" ]
-  then
-    yarn install --production
-  else
-    npm install --only=production
-  fi
+  npm install --only=production
   # Remove our packages to ensure side-by-side versions are used (which we link)
   rm -rf node_modules/{babel-preset-react-app,eslint-config-react-app,react-dev-utils,react-error-overlay,react-scripts}
   cd ../..
@@ -88,6 +83,19 @@ set -x
 cd ..
 root_path=$PWD
 
+# Make sure we don't introduce accidental references to PATENTS.
+EXPECTED='packages/react-error-overlay/fixtures/bundle.mjs
+packages/react-error-overlay/fixtures/bundle.mjs.map
+packages/react-error-overlay/fixtures/bundle_u.mjs
+packages/react-error-overlay/fixtures/bundle_u.mjs.map
+tasks/e2e-simple.sh'
+ACTUAL=$(git grep -l PATENTS)
+if [ "$EXPECTED" != "$ACTUAL" ]; then
+  echo "PATENTS crept into some new files?"
+  diff -u <(echo "$EXPECTED") <(echo "$ACTUAL") || true
+  exit 1
+fi
+
 # Clear cache to avoid issues with incorrect packages being used
 if hash yarnpkg 2>/dev/null
 then
@@ -109,10 +117,6 @@ fi
 
 if hash npm 2>/dev/null
 then
-  # npm 5 is too buggy right now
-  if [ $(npm -v | head -c 1) -eq 5 ]; then
-    npm i -g npm@^4.x
-  fi;
   npm cache clean || npm cache verify
 fi
 
@@ -136,13 +140,6 @@ then
   cd $temp_app_path
   err_output=`node "$root_path"/packages/create-react-app/index.js test-node-version 2>&1 > /dev/null || echo ''`
   [[ $err_output =~ You\ are\ running\ Node ]] && exit 0 || exit 1
-fi
-
-if [ "$USE_YARN" = "yes" ]
-then
-  # Install Yarn so that the test can use it to install packages.
-  npm install -g yarn
-  yarn cache clean
 fi
 
 # We removed the postinstall, so do it manually here
